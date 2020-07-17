@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block body %}
+<form action="{{action}}" method="post">
+<p><textarea id="input" name="text" rows="5" cols="40" placeholder="Input Text Here...">{{input}}</textarea></p>
+<p><input type="submit" name="encode" id="encode" class="button" value="Encode"/></p>
+<p><textarea id="dna" name="dna" rows="5" cols="40">{{dna}}</textarea></p>
+<p><input type="submit" name="decode" id="decode" class="button" value="Decode"/></p>
+<p><textarea id="output" name="decoded" rows="5" cols="40" readonly>{{output}}</textarea></p>
+<p><input type="submit" name="clear" id="clear" class="button" value="Clear Fields"/></p>
+</form>
+{% endblock %}
