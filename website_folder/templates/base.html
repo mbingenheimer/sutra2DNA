@@ -4,15 +4,21 @@
         {% block title %}
         {% endblock %}
     </title>
-    <style>m
+    <style>
         * {
             margin: auto;
             box-sizing: border-box;
         }
 
+        #pre-header {
+            font-size: 24px;
+            font-family: Helvetica;
+            text-decoration: bold;
+        }
+
         header {
-            font-size: 50px;
-            color: green;
+            font-size: 24px;
+            font-family: Helvetica;
             height: 100px;
         }
 
@@ -29,10 +35,10 @@
     </style>
 </head>
 <body>
+<div id="pre-header">{{header_elements[0]}}</div>
 <header>
-    <a href="/">Home</a>
-    <a href="/simple">Simple</a>
-    <a href="/ternary">Ternary</a>
+    <a href="/{{header_elements[1]}}">{{header_elements[2]}}</a>
+    <a href="/{{header_elements[3]}}">{{header_elements[4]}}</a>
 </header>
 {% block body %}{% endblock %}
 </body>
