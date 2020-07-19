@@ -1,101 +1,75 @@
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
-transcoding = ['A', 'C', 'G', 'T']
+transcoding = [chr(i + 97) for i in range(11)]
+master_page_selection = ['Home', 'Simple Transform', 'Some Other Page']
 
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', header_elements=['Home', 'simple', 'Simple Transform', '',
+                                                          'Some Other Algorithm'])
 
 
 @app.route('/simple', methods=['POST', 'GET'])
-def simple():
+def simple_transform():
     text_string = ''
     dna_string = ''
     output_string = ''
     if request.method == 'POST':
         if 'encode' in request.form:
             input_text = request.form['text']
-            dna_string = convert_unicode_to_dna(input_text, 'simple')
-            return render_template('simple.html', action='/simple', text=text_string, dna=dna_string,
-                                   output=output_string)
+            range_value = int(request.form['range'])
+            dna_string = convert_unicode_to_dna(input_text, range_value)
+            return render_template('simple_transform.html', action='/simple', text=text_string, dna=dna_string,
+                                   output=output_string, range_value=range_value, error_message='',
+                                   header_elements=['Simple Transform', '', 'Home', '', 'Some Other Algorithm'])
         elif 'decode' in request.form:
-            output_string = convert_dna_to_unicode(request.form['dna'], 'simple')
-            return render_template('simple.html', action='/simple', text=text_string, dna=dna_string,
-                                   output=output_string)
+            range_value = int(request.form['range'])
+            try:
+                output_string = convert_dna_to_unicode(request.form['dna'], range_value)
+                return render_template('simple_transform.html', action='/simple', text=text_string, dna=dna_string,
+                                       header_elements=['Simple Transform', '', 'Home', '', 'Some Other Algorithm'])
+            except OverflowError:
+                return render_template('simple_transform.html', action='/simple', text=text_string, dna=dna_string,
+                                       output=output_string, range_value=range_value,
+                                       error_message='Decoded Unicode value was too large.',
+                                       header_elements=['Simple Transform', '', 'Home', '', 'Some Other Algorithm'])
         elif 'clear' in request.form:
             text_string = dna_string = output_string = ''
-            return render_template('simple.html', action='/simple', text=text_string, dna=dna_string,
-                                   output=output_string)
+            return render_template('simple_transform.html', action='/simple', text=text_string, dna=dna_string,
+                                   output=output_string, range_value=request.form['range'], error_message='',
+                                   header_elements=['Simple Transform', '', 'Home', '', 'Some Other Algorithm'])
         else:
             pass
     else:
-        return render_template('simple.html', action='/simple', text='', dna='', output='')
+        return render_template('simple_transform.html', action='/simple', text='', dna='', output='', range_value='2',
+                               error_message='', header_elements=['Simple Transform', '', 'Home', '',
+                                                                  'Some Other Algorithm'])
 
 
-@app.route('/ternary', methods=['POST', 'GET'])
-def ternary():
-    text_string = ''
-    dna_string = ''
-    output_string = ''
-    if request.method == 'POST':
-        if 'encode' in request.form:
-            input_text = request.form['text']
-            dna_string = convert_unicode_to_dna(input_text, 'ternary')
-            return render_template('ternary.html', action='/ternary', text=text_string, dna=dna_string,
-                                   output=output_string)
-        elif 'decode' in request.form:
-            output_string = convert_dna_to_unicode(request.form['dna'], 'ternary')
-            return render_template('ternary.html', action='/ternary', text=text_string, dna=dna_string,
-                                   output=output_string)
-        elif 'clear' in request.form:
-            text_string = dna_string = output_string = ''
-            return render_template('ternary.html', action='/ternary', text=text_string, dna=dna_string,
-                                   output=output_string)
-        else:
-            pass
-    else:
-        return render_template('ternary.html', action='/ternary', text='', dna='', output='')
-
-
-def convert_decimal_to_ternary(dec):
-    if dec < 3:
+def convert_decimal_to_base(dec, base):
+    if dec < base:
         return str(dec)
     else:
-        return convert_decimal_to_ternary(int(dec / 3)) + str(dec % 3)
+        return convert_decimal_to_base(int(dec / base), base) + str(dec % base)
 
 
-def convert_unicode_to_dna(user_input, algorithm):
+def convert_unicode_to_dna(user_input, base):
     dna_string = ''
-    if algorithm == 'ternary':
-        for character in user_input:
-            ternary_value = convert_decimal_to_ternary(ord(character))
-            dna_string += ''.join([transcoding[int(i)] for i in ternary_value])
-            dna_string += transcoding[3]
-    elif algorithm == 'simple':
-        for character in user_input:
-            binary_value = str(bin(ord(character)))[2:].zfill(18)
-            dna_string += ''.join(transcoding[2 * int(binary_value[i * 2]) + int(binary_value[(i * 2) + 1])]
-                                  for i in range(int(len(binary_value) / 2)))
-    else:
-        return
+    for character in user_input:
+        ternary_value = convert_decimal_to_base(ord(character), base)
+        dna_string += ''.join([transcoding[int(i)] for i in ternary_value])
+        dna_string += transcoding[base]
     return dna_string
 
 
-def convert_dna_to_unicode(dna_input, algorithm):
+def convert_dna_to_unicode(dna_input, base):
     unicode_string = ''
-    if algorithm == 'ternary':
-        for dna_strings in dna_input.split('T')[:len(dna_input.split('T')) - 1]:
-            unicode_string += chr(int(''.join([str(transcoding.index(i)) for i in dna_strings]), 3))
-    elif algorithm == 'simple':
-        binary_values = ''
-        for character in dna_input:
-            binary_values += str(bin(transcoding.index(character)))[2:].zfill(2)
-        for value in range(0, len(binary_values), 9):
-            unicode_string += chr(int(binary_values[value:value + 9], 2))
-    else:
-        return
+    for dna_strings in dna_input.split(transcoding[base]):
+        if len(dna_strings) == 0:
+            continue
+        unicode_string += chr(int(''.join([str(transcoding.index(i)) for i in dna_strings]), base))
     return unicode_string
 
 
