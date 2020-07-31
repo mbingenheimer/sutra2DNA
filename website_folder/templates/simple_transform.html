@@ -1,2 +1,12 @@
 {% extends 'algorithm_base.html' %}
 {% block title %}Simple Transform{% endblock %}
+{% block choice %}
+<p id="radio-buttons">
+    <input id="base-2" class="radio-button" type="radio" name="base" value="2" {{checked[0]}}>
+    <label id="base-2-label" for="base-2">Base 2</label>
+    <input id="base-3" class="radio-button" type="radio" name="base" value="3" {{checked[1]}}>
+    <label id="base-3-label" for="base-3">Base 3</label>
+    <input id="base-4" class="radio-button" type="radio" name="base" value="4" {{checked[2]}}>
+    <label id="base-4-label" for="base-4">Base 4</label>
+</p>
+{% endblock %}

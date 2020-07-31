@@ -1,13 +1,41 @@
-{% extends 'base.html' %}
-{% block body %}
-<form action="{{action}}" method="post">
-    <p><textarea id="input" name="text" rows="5" cols="40" placeholder="Input Text Here...">{{input}}</textarea></p>
-    <p><input type='range' min="2" max="10" name="range" value="{{range_value}}"/></p>
-    <p><input type="submit" name="encode" id="encode" class="button" value="Encode"/></p>
-    <p><textarea id="dna" name="dna" rows="5" cols="40">{{dna}}</textarea></p>
-    <p><input type="submit" name="decode" id="decode" class="button" value="Decode"/></p>
-    <p>{{error_message}}</p>
-    <p><textarea id="output" name="decoded" rows="5" cols="40" readonly>{{output}}</textarea></p>
-    <p><input type="submit" name="clear" id="clear" class="button" value="Clear Fields"/></p>
+{% extends "base.html" %}
+{% block main_form %}
+<form id="main-form" action="{{action}}" method="post">
+    <div id="input-area">
+        <div class="left">{{input_left}}</div>
+        <div class="right">{{input_right}}</div>
+        <p>
+            <textarea id="input-textarea" name="input_text" placeholder="Input text here...">{{input_text}}</textarea>
+        </p>
+        <p>
+            <input id="encode-button" class="page-button" type="submit" name="encode" value="Encode">
+        </p>
+    </div>
+    {% block choice %}
+    {% endblock %}
+    <div id="encode-area">
+        <div class="left">{{encode_left}}</div>
+        <div class="right">{{encode_right}}</div>
+        <p>
+            <textarea id="dna-textarea" name="dna_text">{{dna_text}}</textarea>
+        </p>
+    </div>
+    <p>
+        <input id="decode-button" class="page-button" type="submit" name="decode" value="Decode">
+    </p>
+    <div class="decode-area">
+        <div class="left">
+            {{decode_left}}
+        </div>
+        <div class="right">
+            {{user_message}}
+        </div>
+        <p>
+            <textarea id="output-textarea" readonly>{{output_text}}</textarea>
+        </p>
+        <p>
+            <input class="page-button" type="submit" name="clear" value="Clear Fields">
+        </p>
+    </div>
 </form>
 {% endblock %}
