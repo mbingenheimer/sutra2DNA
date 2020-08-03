@@ -1,169 +1,66 @@
-from flask import Flask, render_template, request
-import unireedsolomon as rs
+import unireedsolomon
+from random import random
 
-app = Flask(__name__)
-transcoding = [chr(i + 97) for i in range(11)]
-num_errors = 0
-msg_length = 0
-master_page_selection = ['Home', 'Simple Transform', 'Some Other Page']
+transcoding = ['A', 'C', 'G', 'T']
+message = chr(131074) + chr(131074) + chr(131074) + chr(131074) + chr(131074) + chr(131074) + chr(131074)
 
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+def convert_unicode_to_binary(unicode_input):
+    binary_output = ''
+    for character in unicode_input:
+        binary_output += str(bin(ord(character)))[2:].zfill(18)
+    return binary_output
 
 
-@app.route('/simple', methods=['POST', 'GET'])
-def simple_transform():
-    input_string = ''
-    dna_string = ''
-    output_string = ''
-    if request.method == 'POST':
-        if 'encode' in request.form:
-            input_text = request.form['input_text']
-            range_value = int(request.form['base'])
-            checked_value = ['', '', '']
-            checked_value[range_value - 2] = 'checked'
-            dna_string = convert_unicode_to_dna(input_text, range_value)
-            return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                   checked=checked_value, dna_text=dna_string, user_message='',
-                                   output_text=output_string)
-        elif 'decode' in request.form:
-            range_value = int(request.form['base'])
-            checked_value = ['', '', '']
-            checked_value[range_value - 2] = 'checked'
-            try:
-                output_string = convert_dna_to_unicode(request.form['dna_text'], range_value)
-                return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                       checked=checked_value, dna_text=dna_string, user_message='',
-                                       output_text=output_string)
-            except OverflowError:
-                return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                       checked=['checked', '', ''], dna_text=dna_string,
-                                       user_message='One or more of the values that you tried to decode fell outside of'
-                                                    ' the Unicode bounds. Try using a shorter DNA value or encoding a'
-                                                    ' different set of data.', output_text=output_string)
-            except ValueError:
-                return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                       checked=['checked', '', ''], dna_text=dna_string,
-                                       user_message='One or more of the values that you tried to decode were not '
-                                                    'accounted for based on your selected encoding method. Please try '
-                                                    'again with a different set of data.', output_text=output_string)
-            except Exception as e:
-                print(e)
-                return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                       checked=['checked', '', ''], dna_text=dna_string,
-                                       user_message='There was an unknown error while decoding your DNA data. Please '
-                                                    'try again with a different input.', output_text=output_string)
-        elif 'clear' in request.form:
-            input_string = dna_string = output_string = ''
-            return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                   checked=['checked', '', ''], dna_text=dna_string, user_message='',
-                                   output_text=output_string)
-        else:
-            pass
-    else:
-        return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                               checked=['checked', '', ''], dna_text=dna_string, user_message='',
-                               output_text=output_string)
+def convert_binary_to_reed_solomon(binary_input, errors):
+    rsc = unireedsolomon.RSCoder(len(binary_input) + (2 * errors), len(binary_input))
+    return rsc.encode(binary_input)
 
 
-@app.route('/solomon', methods=['POST', 'GET'])
-def reed_solomon_transform():
-    global num_errors
-    global msg_length
-    if request.method == 'POST':
-        if 'encode' in request.form:
-            user_message = ''
-            input_text = request.form['input_text']
-            msg_length = len(input_text)
-            try:
-                number_of_errors = int(request.form['error_choice'])
-                if number_of_errors == 0:
-                    user_message = 'The entered number of possible errors must be at least \'1\'.'
-                    number_of_errors = 1
-            except ValueError:
-                user_message = 'The entered number of possible errors must be at least \'1\'.'
-                number_of_errors = 1
-            num_errors = number_of_errors
-            dna_string = unicode_to_reed_solomon(input_text, number_of_errors)
-            return render_template('solomon.html', action='/solomon', input_text='', error_text=number_of_errors,
-                                   dna_text=dna_string, user_message=user_message, output_text='',
-                                   input_left='Input left text...', encode_right='Encode right text...',
-                                   decode_left='Decode left text...')
-        elif 'decode' in request.form:
-            encoded_text = request.form['dna_text']
-            decoded_text = reed_solomon_to_unicode(encoded_text, msg_length, num_errors)
-            return render_template('solomon.html', action='/solomon', input_text='', error_text=num_errors,
-                                   dna_text='', user_message='', output_text=decoded_text)
-        elif 'clear' in request.form:
-            return render_template('solomon.html', action='/solomon', input_text='', error_text='', dna_text='',
-                                   user_message='', output_text='')
-        else:
-            return render_template('solomon.html', action='/solomon', input_text='', error_text='', dna_text='',
-                                   user_message='', output_text='')
-    else:
-        return render_template('solomon.html', action='/solomon', input_text='', error_text='', dna_text='',
-                               user_message='', output_text='')
+def convert_reed_solomon_to_binary(encoded_input, message_length, errors):
+    rsc = unireedsolomon.RSCoder(message_length + (2 * errors), message_length)
+    return rsc.decode(encoded_input)[0]
 
 
-def convert_decimal_to_base(dec, base):
-    if dec < base:
-        return str(dec)
-    else:
-        return convert_decimal_to_base(int(dec / base), base) + str(dec % base)
+def convert_binary_to_unicode(binary_input):
+    unicode_output = ''
+    for starting_position in range(0, len(binary_input), 18):
+        unicode_output += chr(int(binary_input[starting_position:starting_position + 18], 2))
+    return unicode_output
 
 
-def convert_unicode_to_dna(user_input, base):
-    dna_string = ''
-    for character in user_input:
-        converted_value = convert_decimal_to_base(ord(character), base)
-        dna_string += ''.join([transcoding[int(i)] for i in converted_value])
-        dna_string += transcoding[base]
-    return dna_string
+def generate_errors(dna_string, errors):
+    return_string = [i for i in dna_string]
+    for i in range(errors):
+        return_string[int(random() * len(dna_string))] = transcoding[int(random() * 4)]
+    return ''.join(return_string)
 
 
-def convert_dna_to_unicode(dna_input, base):
-    unicode_string = ''
-    for dna_strings in dna_input.split(transcoding[base]):
-        if len(dna_strings) == 0:
-            continue
-        unicode_string += chr(int(''.join([str(transcoding.index(i)) for i in dna_strings]), base))
-    return unicode_string
+def convert_encoded_to_dna(encoded):
+    dna_binary = ''
+    for character in encoded:
+        dna_binary += str(bin(ord(character)))[2:].zfill(8)
+    return ''.join([transcoding[2*int(dna_binary[i]) + int(dna_binary[i+1])] for i in range(0, len(dna_binary) - 2, 2)])
 
 
-def convert_unicode_to_dna_simple(text_input):
-    dna_string = ''
-    for character in text_input:
-        binary_value = str(bin(ord(character)))[2:].zfill(20)
-        print(binary_value)
-        for c in range(0, len(binary_value), 2):
-            dna_string += transcoding[int(binary_value[c]) * 2 + int(binary_value[c+1])]
-    return dna_string
+def convert_dna_to_encoded(dna_string):
+    encoded_string = ''
+    binary_stage = ''
+    for character in dna_string:
+        binary_stage += str(int(transcoding.index(character) / 2))
+        binary_stage += str(int(transcoding.index(character) % 2))
+    for i in range(0, len(binary_stage), 8):
+        encoded_string += chr(int(binary_stage[i:i + 8], 2))
+    return encoded_string
 
 
-def convert_dna_to_unicode_simple(dna_string):
-    return_string = ''
-    for character in range(0, len(dna_string), 10):
-        numerical_dna_string = ''
-        for x in dna_string[character:character+10]:
-            numerical_dna_string += str(int(transcoding.index(x) / 2))
-            numerical_dna_string += str(int(transcoding.index(x) % 2))
-        return_string += chr(int(numerical_dna_string, 2))
-    return return_string
+binary = convert_unicode_to_binary(message)
+reed_solomon = convert_binary_to_reed_solomon(binary, 4)
+original_dna = convert_encoded_to_dna(reed_solomon)
+errors_dna = generate_errors(original_dna, 4)
+decoded = convert_dna_to_encoded(errors_dna)
+binary_converted = convert_reed_solomon_to_binary(decoded, len(binary), 4)
+unicode = convert_binary_to_unicode(binary_converted)
 
-
-def unicode_to_reed_solomon(message, number_of_errors):
-    encoder = rs.RSCoder(len(message) + (2 * number_of_errors), len(message))
-    encoded_unicode = encoder.encode(message)
-    return convert_unicode_to_dna(encoded_unicode, 4)
-
-
-def reed_solomon_to_unicode(dna, message_length, number_of_errors):
-    decoder = rs.RSCoder(message_length + (2 * number_of_errors), message_length)
-    dna_string = convert_dna_to_unicode(dna, 4)
-    return decoder.decode(dna_string)[0]
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+print(message + '\n' + binary + '\n' + reed_solomon + '\n' + original_dna + '\n' + errors_dna + '\n' + decoded + '\n' +
+      binary_converted + '\n' + unicode)
