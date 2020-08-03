@@ -5,7 +5,6 @@ app = Flask(__name__)
 transcoding = [chr(i + 97) for i in range(11)]
 num_errors = 0
 msg_length = 0
-master_page_selection = ['Home', 'Simple Transform', 'Some Other Page']
 
 
 @app.route('/')
