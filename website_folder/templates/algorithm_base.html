@@ -7,17 +7,23 @@
         <p>
             <textarea id="input-textarea" name="input_text" placeholder="Input text here...">{{input_text}}</textarea>
         </p>
+        <p class="coding_information">
+            {{encoding_information}}
+        </p>
+        {% block choice %}
+        {% endblock %}
         <p>
             <input id="encode-button" class="page-button" type="submit" name="encode" value="Encode">
         </p>
     </div>
-    {% block choice %}
-    {% endblock %}
     <div id="encode-area">
         <div class="left">{{encode_left}}</div>
         <div class="right">{{encode_right}}</div>
         <p>
             <textarea id="dna-textarea" name="dna_text">{{dna_text}}</textarea>
+        </p>
+        <p class="coding_information">
+            {{decoding_information}}
         </p>
     </div>
     <p>

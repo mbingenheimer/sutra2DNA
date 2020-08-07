@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import reed_solomon as rsf
 import unireedsolomon as rs
 
 app = Flask(__name__)
@@ -20,6 +21,10 @@ def simple_transform():
     if request.method == 'POST':
         if 'encode' in request.form:
             input_text = request.form['input_text']
+            if len(input_text) > 200:
+                return render_template('simple_transform.html', action='/simple', input_text=input_string,
+                                       checked=['checked', '', ''], dna_text=dna_string, user_message='Your message '
+                                       'cannot be longer than 200 characters.', output_text=output_string)
             range_value = int(request.form['base'])
             checked_value = ['', '', '']
             checked_value[range_value - 2] = 'checked'
@@ -76,6 +81,10 @@ def reed_solomon_transform():
             user_message = ''
             input_text = request.form['input_text']
             msg_length = len(input_text)
+            if msg_length > 200:
+                return render_template('solomon.html', action='/solomon', input_text='', error_text='', dna_text='',
+                                       user_message='Your message cannot be longer than 200 characters.',
+                                       output_text='')
             try:
                 number_of_errors = int(request.form['error_choice'])
                 if number_of_errors == 0:
@@ -84,15 +93,18 @@ def reed_solomon_transform():
             except ValueError:
                 user_message = 'The entered number of possible errors must be at least \'1\'.'
                 number_of_errors = 1
-            num_errors = number_of_errors
-            dna_string = unicode_to_reed_solomon(input_text, number_of_errors)
+            num_errors = number_of_errors * 2
+            dna_string = rsf.convert_unicode_to_dna(input_text, num_errors, transcoding)
             return render_template('solomon.html', action='/solomon', input_text='', error_text=number_of_errors,
                                    dna_text=dna_string, user_message=user_message, output_text='',
                                    input_left='Input left text...', encode_right='Encode right text...',
-                                   decode_left='Decode left text...')
+                                   decode_left='Decode left text...', encoding_information='Binary: ' +
+                                   rsf.convert_unicode_to_binary(input_text) + '\nEncoded: ' +
+                                   rsf.convert_binary_to_reed_solomon(rsf.convert_unicode_to_binary(input_text),
+                                                                      num_errors))
         elif 'decode' in request.form:
             encoded_text = request.form['dna_text']
-            decoded_text = reed_solomon_to_unicode(encoded_text, msg_length, num_errors)
+            decoded_text = rsf.convert_dna_to_unicode(encoded_text, msg_length, num_errors, transcoding)
             return render_template('solomon.html', action='/solomon', input_text='', error_text=num_errors,
                                    dna_text='', user_message='', output_text=decoded_text)
         elif 'clear' in request.form:
