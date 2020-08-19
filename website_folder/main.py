@@ -21,14 +21,12 @@ def simple_transform():
     if request.method == 'POST':
         if 'encode' in request.form:
             input_text = request.form['input_text']
-            if len(input_text) > 200:
-                return render_template('simple_transform.html', action='/simple', input_text=input_string,
-                                       checked=['checked', '', ''], dna_text=dna_string, user_message='Your message '
-                                       'cannot be longer than 200 characters.', output_text=output_string)
             range_value = int(request.form['base'])
             checked_value = ['', '', '']
             checked_value[range_value - 2] = 'checked'
             dna_string = convert_unicode_to_dna(input_text, range_value)
+            input_string = input_text
+            output_string = request.form['output_text']
             return render_template('simple_transform.html', action='/simple', input_text=input_string,
                                    checked=checked_value, dna_text=dna_string, user_message='',
                                    output_text=output_string)
@@ -36,6 +34,9 @@ def simple_transform():
             range_value = int(request.form['base'])
             checked_value = ['', '', '']
             checked_value[range_value - 2] = 'checked'
+            input_string = request.form['input_text']
+            dna_string = request.form['dna_text']
+            output_string = request.form['output_text']
             try:
                 output_string = convert_dna_to_unicode(request.form['dna_text'], range_value)
                 return render_template('simple_transform.html', action='/simple', input_text=input_string,
@@ -75,16 +76,10 @@ def simple_transform():
 @app.route('/solomon', methods=['POST', 'GET'])
 def reed_solomon_transform():
     global num_errors
-    global msg_length
     if request.method == 'POST':
         if 'encode' in request.form:
             user_message = ''
             input_text = request.form['input_text']
-            msg_length = len(input_text)
-            if msg_length > 200:
-                return render_template('solomon.html', action='/solomon', input_text='', error_text='', dna_text='',
-                                       user_message='Your message cannot be longer than 200 characters.',
-                                       output_text='')
             try:
                 number_of_errors = int(request.form['error_choice'])
                 if number_of_errors == 0:
@@ -94,19 +89,34 @@ def reed_solomon_transform():
                 user_message = 'The entered number of possible errors must be at least \'1\'.'
                 number_of_errors = 1
             num_errors = number_of_errors * 2
-            dna_string = rsf.convert_unicode_to_dna(input_text, num_errors, transcoding)
-            return render_template('solomon.html', action='/solomon', input_text='', error_text=number_of_errors,
-                                   dna_text=dna_string, user_message=user_message, output_text='',
+            dna_string = request.form['dna_text']
+            input_string = request.form['input_text']
+            encode_string = rsf.convert_binary_to_reed_solomon(rsf.convert_unicode_to_binary(input_text), num_errors)
+            format_encode = encode_string[:len(encode_string) - (2 * num_errors)] + ' + ' + \
+                encode_string[len(encode_string) - (2 * num_errors):]
+            output_string = request.form['output_text']
+            return render_template('solomon.html', action='/solomon', input_text=input_string,
+                                   error_text=number_of_errors, encode_text=format_encode, dna_text=dna_string,
+                                   user_message=user_message, output_text=output_string,
                                    input_left='Input left text...', encode_right='Encode right text...',
-                                   decode_left='Decode left text...', encoding_information='Binary: ' +
-                                   rsf.convert_unicode_to_binary(input_text) + '\nEncoded: ' +
-                                   rsf.convert_binary_to_reed_solomon(rsf.convert_unicode_to_binary(input_text),
-                                                                      num_errors))
+                                   decode_left='Decode left text...')
+        elif 'continue' in request.form:
+            input_string = request.form['input_text']
+            dna_string = rsf.convert_encoded_to_dna(''.join(request.form['encode_text'].split(' + ')), transcoding)
+            encode_string = request.form['encode_text']
+            output_string = request.form['output_text']
+            return render_template('solomon.html', action='/solomon', input_text=input_string,
+                                   error_text=int(num_errors / 2), encode_text=encode_string, dna_text=dna_string,
+                                   user_message='', output_text=output_string)
         elif 'decode' in request.form:
             encoded_text = request.form['dna_text']
             decoded_text = rsf.convert_dna_to_unicode(encoded_text, msg_length, num_errors, transcoding)
-            return render_template('solomon.html', action='/solomon', input_text='', error_text=num_errors,
-                                   dna_text='', user_message='', output_text=decoded_text)
+            input_string = request.form['input_text']
+            encode_string = request.form['encode_text']
+            dna_string = encoded_text
+            return render_template('solomon.html', action='/solomon', input_text=input_string,
+                                   error_text=int(num_errors/2), encode_text=encode_string, dna_text=dna_string,
+                                   user_message='', output_text=decoded_text)
         elif 'clear' in request.form:
             return render_template('solomon.html', action='/solomon', input_text='', error_text='', dna_text='',
                                    user_message='', output_text='')
