@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 {% block main_form %}
 <form id="main-form" action="{{action}}" method="post">
-    <div id="input-area">
+    <div id="input-area" class="content-area">
         <div class="left">{{input_left}}</div>
         <div class="right">{{input_right}}</div>
         <p>
             <textarea id="input-textarea" name="input_text" placeholder="Input text here...">{{input_text}}</textarea>
-        </p>
-        <p class="coding_information">
-            {{encoding_information}}
         </p>
         {% block choice %}
         {% endblock %}
@@ -16,28 +13,26 @@
             <input id="encode-button" class="page-button" type="submit" name="encode" value="Encode">
         </p>
     </div>
-    <div id="encode-area">
-        <div class="left">{{encode_left}}</div>
-        <div class="right">{{encode_right}}</div>
+    {% block encoding %}{% endblock %}
+    <div id="dna-area" class="content-area">
+        <div class="left">{{dna_left}}</div>
+        <div class="right">{{dna_right}}</div>
         <p>
             <textarea id="dna-textarea" name="dna_text">{{dna_text}}</textarea>
         </p>
-        <p class="coding_information">
-            {{decoding_information}}
+        <p>
+            <input id="decode-button" class="page-button" type="submit" name="decode" value="Decode">
         </p>
     </div>
-    <p>
-        <input id="decode-button" class="page-button" type="submit" name="decode" value="Decode">
-    </p>
-    <div class="decode-area">
+    <div id="decode-area" class="content-area">
         <div class="left">
             {{decode_left}}
         </div>
         <div class="right">
-            {{user_message}}
+            {{decode_right}}
         </div>
         <p>
-            <textarea id="output-textarea" readonly>{{output_text}}</textarea>
+            <textarea id="output-textarea" name="output_text" readonly>{{output_text}}</textarea>
         </p>
         <p>
             <input class="page-button" type="submit" name="clear" value="Clear Fields">

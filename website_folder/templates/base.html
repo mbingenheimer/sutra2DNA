@@ -9,11 +9,10 @@
             box-sizing: border-box;
             font-size: 20px;
             font-family: Courier New;
-            overflow-y: hidden;
         }
 
         html {
-            min-width: 1560px;
+            min-width: 1280px;
         }
 
         #header {
@@ -50,96 +49,66 @@
             text-decoration: none;
         }
 
+        #page-content {
+            text-align: center;
+        }
+
         #page-title {
             font-size: 36px;
             padding: 10px;
         }
 
-        #page-content {
-            text-align: center;
+        #main-form {
+        }
+
+        .content-area {
+            width: 90%;
+            margin-bottom: 10px;
+            position: relative;
         }
 
         .left {
-            width: 20%;
-            text-align: left;
-            padding-right: 10px;
-            height: 205px;
+            position: absolute;
             float: left;
-        }
-
-        #main-form {
-            width: 100%;
             height: 100%;
+            width: 15%;
+            padding-right: 10px;
         }
 
         .right {
-            width: 20%;
-            text-align: left;
+            position: absolute;
+            right: 0;
+            height: 100%;
+            width: 15%;
             padding-left: 10px;
-            height: 205px;
-            float: right;
-        }
-
-        #input-area {
-            height: 285px;
-            margin-bottom: 10px;
-        }
-
-        .coding_information {
-            height: 20px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
-        }
-
-        #encode-area {
-            height: 160px;
-            margin-bottom: 10px;
-        }
-
-        #decode-area {
-            height: 160px;
-            margin-bottom: 10px;
         }
 
         textarea {
+            height: 200px;
+            width: 70%;
             resize: none;
-            overflow-y: scroll;
-            width: 100%;
-            height: 160px;
-            margin-bottom: 10px
+            margin-bottom: 10px;
         }
 
-        #error_input {
-            margin-left: 40px;
-            height: 29px;
-            margin-bottom: 10px;
+        .page-button {
+            width: 70%;
         }
 
         #radio-buttons {
             margin-bottom: 10px;
-            text-align: center;
+            width: 70%;
         }
 
-        .radio-button {
-            margin-left: 102px;
-            width: 23px;
-            height: 23px;
+        #error_content {
+            width: 70%;
         }
 
-        .page-button {
+        #error_input {
             margin-bottom: 10px;
-            width: 1047px;
-            height: 35px
+            width: 50%;
+            float: right;
         }
-
-        #user-message {
-            margin-bottom: 10px;
-            width: 60%;
-            height: 130px;
-        }
-
-
-    </style>
+</style>
 </head>
 <body>
 <div id="header">
