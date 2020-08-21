@@ -38,10 +38,8 @@ def convert_dna_to_encoded(dna_string, transcoding):
     for character in dna_string:
         binary_stage += str(int(transcoding.index(character) / 2))
         binary_stage += str(int(transcoding.index(character) % 2))
-    print(binary_stage)
     for i in range(0, len(binary_stage), 8):
         encoded_string += chr(int(binary_stage[i:i + 8], 2))
-    print(encoded_string)
     return encoded_string
 
 

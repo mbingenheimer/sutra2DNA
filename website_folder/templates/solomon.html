@@ -1,7 +1,20 @@
 {% extends 'algorithm_base.html' %}
 {% block title %}Reed Solomon Transform{% endblock %}
 {% block choice %}
-<p>
-    Number of possible errors: <input id="error_input" type="text" name="error_choice" value={{error_text}}>
-</p>
+<div id="error_content">
+    <label for="error_input" style="float: left">Number of possible errors: </label>
+    <input id="error_input" type="text" name="error_choice" value={{error_text}}>
+</div>
+{% endblock %}
+{% block encoding %}
+<div id="encoding-area" class="content-area">
+    <div class="left">{{input_left}}</div>
+    <div class="right">{{input_right}}</div>
+    <p>
+        <textarea id="encoding-textarea" name="encode_text" readonly>{{encode_text}}</textarea>
+    </p>
+    <p>
+        <input id="continue-encoding-button" class="page-button" type="submit" name="continue" value="Continue Encode">
+    </p>
+</div>
 {% endblock %}
