@@ -1,7 +1,7 @@
 # sutra2DNA
 Repository for the sutra@DNA project at TU
 
-Members: Rob Kulathinal, Justin Brody, Michael DArcy, Marcus Bingenheimer
+Members:  Marcus Bingenheimer, Justin Brody, Michael DArcy, Rob Kulathinal
 
 This is the code we distribute as part of the sutra2DNA project at Temple University.
 
