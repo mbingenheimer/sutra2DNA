@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+	{% if session['errors'] == 'FALSE' %}
+		<div class="container mt-3 animate__animated animate__slideInUp">
+	{% else %}
+		<div class="container mt-3">
+	{% endif %}
+		<div class="jumbotron">
+		<div class="page-header mb-4 border-bottom">
+			<h1>Welcome to Coding Theory</h1>
+		</div>
+		
+			<p class="lead">Start by practicing with the famous Hamming codes!</p>
+		</div>
+	</div>
+
+	{% if session['errors'] == 'FALSE' %}
+		<div class="h-100 container animate__animated animate__slideInUp" height = "500px">
+	{% else %}
+		<div class="h-100 container">
+	{% endif %}
+		<div class="jumbotron">
+			<div class=hamming_app_container>
+			</div>
+
+			<div class="bit_row">
+			</div>
+		</div>
+
+
+	</div>
+	
+{% endblock content %}
