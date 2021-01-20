@@ -50,6 +50,60 @@ var BitButton = function (_React$Component) {
   return BitButton;
 }(React.Component);
 
+var Helpers = function () {
+  function Helpers() {
+    _classCallCheck(this, Helpers);
+  }
+
+  _createClass(Helpers, null, [{
+    key: "convertBitsToDNA",
+    value: function convertBitsToDNA(bits) {
+      var dnaString = "";
+      for (var i = 0; i < bits.length; i++) {
+        if (bits.charAt(i) == 0) {
+          if (Math.floor(Math.random() * 2)) {
+            dnaString += "T";
+          } else {
+            dnaString += "A";
+          }
+        } else if (bits.charAt(i) == 1) {
+          if (Math.floor(Math.random() * 2)) {
+            dnaString += "C";
+          } else {
+            dnaString += "G";
+          }
+        }
+      }
+      return dnaString;
+    }
+  }, {
+    key: "convertDNAToBits",
+    value: function convertDNAToBits(dna) {
+      var bitString = "";
+      for (var i = 0; i < dna.length; i++) {
+        if (dna.charAt(i) == "T" || dna.charAt(i) == "A") {
+          bitString += "0";
+        } else if (dna.charAt(i) == "C" || dna.charAt(i) == "G") {
+          bitString += "1";
+        }
+      }
+      return bitString;
+    }
+  }, {
+    key: "onlyContainsFrom",
+    value: function onlyContainsFrom(text, allowedCharacters) {
+      for (var i = 0; i < text.length; i++) {
+        if (!allowedCharacters.includes(text.charAt(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }]);
+
+  return Helpers;
+}();
+
 var EncodeRow = function (_React$Component2) {
   _inherits(EncodeRow, _React$Component2);
 
@@ -72,19 +126,9 @@ var EncodeRow = function (_React$Component2) {
       this.props.handleSubmit(this.state.value);
     }
   }, {
-    key: "onlyContainsFrom",
-    value: function onlyContainsFrom(text, allowedCharacters) {
-      for (var i = 0; i < text.length; i++) {
-        if (!allowedCharacters.includes(text.charAt(i))) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }, {
     key: "handleChange",
     value: function handleChange(event) {
-      if (!this.props.allowedCharacters || this.onlyContainsFrom(event.target.value, this.props.allowedCharacters)) {
+      if (!this.props.allowedCharacters || Helpers.onlyContainsFrom(event.target.value, this.props.allowedCharacters)) {
         this.setState({ value: event.target.value });
       }
     }
@@ -227,53 +271,9 @@ var HammingCodeApp = function (_React$Component4) {
   }*/
 
   _createClass(HammingCodeApp, [{
-    key: "convertBitsToDNA",
-    value: function convertBitsToDNA(bits) {
-      var dnaString = "";
-      for (var i = 0; i < bits.length; i++) {
-        if (bits.charAt(i) == 0) {
-          if (Math.floor(Math.random() * 2)) {
-            dnaString += "T";
-          } else {
-            dnaString += "A";
-          }
-        } else if (bits.charAt(i) == 1) {
-          if (Math.floor(Math.random() * 2)) {
-            dnaString += "C";
-          } else {
-            dnaString += "G";
-          }
-        }
-      }
-      return dnaString;
-    }
-  }, {
-    key: "convertDNAToBits",
-    value: function convertDNAToBits(dna) {
-      var bitString = "";
-      for (var i = 0; i < dna.length; i++) {
-        if (dna.charAt(i) == "T" || dna.charAt(i) == "A") {
-          bitString += "0";
-        } else if (dna.charAt(i) == "C" || dna.charAt(i) == "G") {
-          bitString += "1";
-        }
-      }
-      return bitString;
-    }
-  }, {
-    key: "onlyContainsFrom",
-    value: function onlyContainsFrom(text, allowedCharacters) {
-      for (var i = 0; i < text.length; i++) {
-        if (!allowedCharacters.includes(text.charAt(i))) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }, {
     key: "handleDecodeChange",
     value: function handleDecodeChange(value) {
-      if (this.onlyContainsFrom(value, "TACGtacg")) {
+      if (Helpers.onlyContainsFrom(value, "TACGtacg")) {
         this.setState({ encodedText: value.toUpperCase() });
       }
     }
@@ -303,7 +303,7 @@ var HammingCodeApp = function (_React$Component4) {
             }
           );*/
 
-        _this5.setState({ encodedText: _this5.convertBitsToDNA(bits) });
+        _this5.setState({ encodedText: Helpers.convertBitsToDNA(bits) });
       });
 
       // send the request
@@ -316,7 +316,7 @@ var HammingCodeApp = function (_React$Component4) {
 
       event.preventDefault();
       var xhr = new XMLHttpRequest();
-      var code = this.convertDNAToBits(this.state.encodedText);
+      var code = Helpers.convertDNAToBits(this.state.encodedText);
 
       // open the request with the verb and the url
       xhr.open('GET', 'http://localhost:5000/hammingDecode?code=' + code);
@@ -359,7 +359,7 @@ var HammingCodeApp = function (_React$Component4) {
           React.createElement(
             "p",
             { className: "lead" },
-            this.state.decoded.length != 0 && "Decoded Bits:"
+            this.state.decoded.length != 0 && "Decoded Message:"
           ),
           React.createElement(
             "p",
@@ -374,6 +374,188 @@ var HammingCodeApp = function (_React$Component4) {
   return HammingCodeApp;
 }(React.Component);
 
-//Rendering
+//Rendering Hamming Code App
 
-ReactDOM.render(React.createElement(HammingCodeApp, null), document.querySelector(".hamming_app_container"));
+if (document.querySelector(".hamming_app_container")) {
+  ReactDOM.render(React.createElement(HammingCodeApp, null), document.querySelector(".hamming_app_container"));
+}
+
+// Reed-Solomon App Code Start
+
+
+var ReedSolomonCodeApp = function (_React$Component5) {
+  _inherits(ReedSolomonCodeApp, _React$Component5);
+
+  function ReedSolomonCodeApp(props) {
+    _classCallCheck(this, ReedSolomonCodeApp);
+
+    var _this7 = _possibleConstructorReturn(this, (ReedSolomonCodeApp.__proto__ || Object.getPrototypeOf(ReedSolomonCodeApp)).call(this, props));
+
+    _this7.state = {
+      encodedText: '',
+      decoded: '',
+      noErrors: 3
+    };
+
+    _this7.uniqueValue = 0;
+    _this7.handleEncode = _this7.handleEncode.bind(_this7);
+    _this7.handleDecode = _this7.handleDecode.bind(_this7);
+    _this7.handleDecodeChange = _this7.handleDecodeChange.bind(_this7);
+    _this7.handleErrorsChange = _this7.handleErrorsChange.bind(_this7);
+    //this.handleBitClicked = this.handleBitClicked.bind(this);
+    /*this.getEncodedStringFromButtons = this.getEncodedStringFromButtons.bind(this);*/
+    return _this7;
+  }
+
+  /*getEncodedStringFromButtons(){
+    let encodedString = this.state.bitButtons.reduce((encodedString, bitButton)=> 
+      encodedString.concat(bitButton.props.bit.toString())
+    , "");
+    
+    return encodedString;
+  }*/
+  /*handleBitClicked(uniqueID, bit, changed){
+    const newChanged = !changed;
+    let newBit = 2;
+    if (bit == 0){
+      newBit = 1;
+    }else{
+      newBit = 0;
+    }
+    let newBitButtons = []
+    this.state.bitButtons.forEach(bitButton => {
+      if(bitButton.props.uniqueID == uniqueID){
+        this.uniqueValue = this.uniqueValue + 1;
+        newBitButtons.push(<BitButton key = {this.uniqueValue} uniqueID={this.uniqueValue} bit = {newBit} changed = {newChanged} handleBitClicked = {this.handleBitClicked} />);
+      }else{
+        newBitButtons.push(bitButton);
+      }
+    });
+    this.setState({bitButtons:newBitButtons})
+  }*/
+
+  _createClass(ReedSolomonCodeApp, [{
+    key: "handleErrorsChange",
+    value: function handleErrorsChange(event) {
+      if (event.target.value <= 5 && event.target.value >= 0) {
+        this.setState({ noErrors: event.target.value });
+      }
+    }
+  }, {
+    key: "handleDecodeChange",
+    value: function handleDecodeChange(value) {
+      if (Helpers.onlyContainsFrom(value, "TACGtacg")) {
+        this.setState({ encodedText: value.toUpperCase() });
+      }
+    }
+  }, {
+    key: "handleEncode",
+    value: function handleEncode(value) {
+      var _this8 = this;
+
+      event.preventDefault();
+
+      var verifiedValue = value;
+
+      var xhr = new XMLHttpRequest();
+      console.log("Here");
+
+      // open the request with the verb and the url
+      xhr.open('GET', 'http://localhost:5000/rsCode?message=' + verifiedValue + "&noErrors=" + (parseInt(this.state.noErrors) + 1).toString());
+      // get a callback when the server responds
+      xhr.addEventListener('load', function () {
+        // update the state of the component with the result here
+        var bits = JSON.parse(xhr.responseText)["code"];
+
+        //this.setState({bitRowTitle: "Encoded Bits (click to change):", bitRowBits:bits})
+        /*let bitButtons = Array.from(bits).map(
+          bit => {
+            this.uniqueValue = this.uniqueValue + 1
+            return <BitButton key = {this.uniqueValue} uniqueID={this.uniqueValue} bit = {bit} changed = {false} handleBitClicked = {this.handleBitClicked} />;
+            }
+          );*/
+
+        _this8.setState({ encodedText: Helpers.convertBitsToDNA(bits) });
+      });
+
+      // send the request
+      xhr.send();
+    }
+  }, {
+    key: "handleDecode",
+    value: function handleDecode(value) {
+      var _this9 = this;
+
+      event.preventDefault();
+      var xhr = new XMLHttpRequest();
+      var code = Helpers.convertDNAToBits(this.state.encodedText);
+
+      // open the request with the verb and the url
+      xhr.open('GET', 'http://localhost:5000/rsDecode?code=' + code + "&noErrors=" + (parseInt(this.state.noErrors) + 1).toString() + "&messageLength=" + this.state.encodedText.length.toString());
+      // get a callback when the server responds
+      xhr.addEventListener('load', function () {
+        // update the state of the component with the result here
+        var message = JSON.parse(xhr.responseText)["message"];
+        //console.log(bits)
+        //console.log(xhr.responseText)
+        _this9.setState({ decoded: message });
+      });
+
+      // send the request
+      xhr.send();
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      document.querySelector('.hamming-popover') != null && $(document).ready(function () {
+        $('.hamming-popover').popover();
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "div",
+        { className: "container" },
+        React.createElement(EncodeRow, { handleSubmit: this.handleEncode }),
+        React.createElement(DecodeRow, { handleSubmit: this.handleDecode, superHandleChange: this.handleDecodeChange, heading: "DNA Reed-Solomon Code:", encodedText: this.state.encodedText }),
+        this.state.encodeRow && React.createElement(
+          "button",
+          { type: "button", className: "hamming-popover btn btn-outline-light btn-sm", "data-toggle": "popover", style: { fontSize: "15px" }, title: "Click to introduce errors", "data-content": "Hamming Codes can correct 1 error and detect upto 2 errors. If 3 or more errors occur, Hamming Codes are incorrectly decoded." },
+          "?"
+        ),
+        React.createElement(
+          "div",
+          { className: "col-3 mr-auto ml-auto" },
+          React.createElement(
+            "p",
+            { className: "lead" },
+            "Number of errors:"
+          ),
+          React.createElement("input", { type: "number", dir: "auto", className: "form-control",
+            style: { backgroundColor: "#272727", color: "white" }, onChange: this.handleErrorsChange, value: this.state.noErrors })
+        ),
+        React.createElement(
+          "div",
+          { className: "mt-4" },
+          React.createElement(
+            "p",
+            { className: "lead" },
+            this.state.decoded.length != 0 && "Decoded Message:"
+          ),
+          React.createElement(
+            "p",
+            { className: "lead", style: { fontWeight: "300" } },
+            this.state.decoded
+          )
+        )
+      );
+    }
+  }]);
+
+  return ReedSolomonCodeApp;
+}(React.Component);
+
+if (document.querySelector(".reedsolomon_app_container")) {
+  ReactDOM.render(React.createElement(ReedSolomonCodeApp, null), document.querySelector(".reedsolomon_app_container"));
+}

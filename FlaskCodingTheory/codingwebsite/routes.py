@@ -2,19 +2,17 @@ from flask import render_template, url_for, flash, redirect, session, request, m
 from codingwebsite import app
 from codingwebsite.forms import HammingInput
 from codingwebsite.hamming import encode, decode, binStringFromBitArr
+import unireedsolomon as rs
 from bitarray import bitarray
 
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/')
 def home():
-	form = HammingInput()
-	session['errors'] = 'FALSE'
-	if form.validate_on_submit():
-		session['formMessage'] = request.form['message']
-		return redirect(url_for('hammingEncoded'))
-	
-	if request.method == 'POST':
-		session["errors"] = 'TRUE'
-	return render_template('home.html', form=form)
+	return render_template('home.html')
+
+@app.route("/reedsolomon")
+def reedsolomon():
+
+	return render_template("reedsolomon.html")
 
 @app.route("/hammingCode")
 def hammingCode():
@@ -22,7 +20,7 @@ def hammingCode():
 
 	myBytes = message.encode("utf-8")
 
-	data = bitarray(bin(int(myBytes.hex(), base=16))[2:])
+	data = bitarray(bin(int(myBytes.hex(), base=16))[2:]) #complicated way of getting bits from unicode text
 	code = binStringFromBitArr(encode(data))
 
 	response = make_response(
@@ -44,6 +42,55 @@ def hammingDecode():
 	try:
 		message = binStringFromBitArr(decode(bitarray(code)))
 		finalMessage = bytes.fromhex(hex(int(message, 2))[2:]).decode()
+	except ValueError as e:
+		if str(e) == "Two errors detected.":
+			finalMessage = "I can detect upto, but not correct, two errors."
+
+	response = make_response(
+                jsonify(
+                    {"message": finalMessage}
+                ),
+                200,
+            )
+	response.headers["Content-Type"] = "application/json"
+	return response
+
+@app.route("/rsCode")
+def rsCode():
+	message = request.args.get("message")
+	noErrors = request.args.get("noErrors")
+	coder = rs.RSCoder(len(message) + int(noErrors),len(message))
+
+	encodedText = coder.encode(message)
+
+	myBytes = encodedText.encode("utf-8")
+
+
+	data = bitarray(bin(int(myBytes.hex(), base=16))[2:])
+	code = binStringFromBitArr(data)
+
+	response = make_response(
+                jsonify(
+                    {"code": code}
+                ),
+                200,
+            )
+	response.headers["Content-Type"] = "application/json"
+	return response
+
+@app.route("/rsDecode")
+def rsDeocde():
+	code = request.args.get("code")
+	noErrors = request.args.get("noErrors")
+	messageLength = request.args.get("messageLength")
+	coder = rs.RSCoder(int(messageLength) + int(noErrors), int(messageLength))
+
+	message = ""
+	finalMessage= ""
+	try:
+		#message = binStringFromBitArr(decode(bitarray(code)))
+		message = bytes.fromhex(hex(int(code, 2))[2:]).decode()
+		finalMessage = coder.decode(message)[0]
 	except ValueError as e:
 		if str(e) == "Two errors detected.":
 			finalMessage = "I can detect upto, but not correct, two errors."
