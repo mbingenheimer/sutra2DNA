@@ -221,26 +221,59 @@ var DecodeRow = function (_React$Component3) {
   return DecodeRow;
 }(React.Component);
 
-var HammingCodeApp = function (_React$Component4) {
-  _inherits(HammingCodeApp, _React$Component4);
+var BitRow = function (_React$Component4) {
+  _inherits(BitRow, _React$Component4);
+
+  function BitRow() {
+    _classCallCheck(this, BitRow);
+
+    return _possibleConstructorReturn(this, (BitRow.__proto__ || Object.getPrototypeOf(BitRow)).apply(this, arguments));
+  }
+
+  _createClass(BitRow, [{
+    key: "render",
+    value: function render() {
+      return React.createElement(
+        "div",
+        { id: "quickfit", style: { overflow: "hidden", textOverflow: "ellipsis" } },
+        React.createElement(
+          "p",
+          { className: "lead" },
+          "Encoded Bits Fragment:"
+        ),
+        React.createElement(
+          "p",
+          { className: "form-control", style: { backgroundColor: "#272727", color: "white", border: 0 } },
+          this.props.bits
+        )
+      );
+    }
+  }]);
+
+  return BitRow;
+}(React.Component);
+
+var HammingCodeApp = function (_React$Component5) {
+  _inherits(HammingCodeApp, _React$Component5);
 
   function HammingCodeApp(props) {
     _classCallCheck(this, HammingCodeApp);
 
-    var _this4 = _possibleConstructorReturn(this, (HammingCodeApp.__proto__ || Object.getPrototypeOf(HammingCodeApp)).call(this, props));
+    var _this5 = _possibleConstructorReturn(this, (HammingCodeApp.__proto__ || Object.getPrototypeOf(HammingCodeApp)).call(this, props));
 
-    _this4.state = {
+    _this5.state = {
       encodedText: '',
+      encodedBits: '',
       decoded: ''
     };
 
-    _this4.uniqueValue = 0;
-    _this4.handleEncode = _this4.handleEncode.bind(_this4);
-    _this4.handleDecode = _this4.handleDecode.bind(_this4);
-    _this4.handleDecodeChange = _this4.handleDecodeChange.bind(_this4);
+    _this5.uniqueValue = 0;
+    _this5.handleEncode = _this5.handleEncode.bind(_this5);
+    _this5.handleDecode = _this5.handleDecode.bind(_this5);
+    _this5.handleDecodeChange = _this5.handleDecodeChange.bind(_this5);
     //this.handleBitClicked = this.handleBitClicked.bind(this);
     /*this.getEncodedStringFromButtons = this.getEncodedStringFromButtons.bind(this);*/
-    return _this4;
+    return _this5;
   }
 
   /*getEncodedStringFromButtons(){
@@ -280,7 +313,7 @@ var HammingCodeApp = function (_React$Component4) {
   }, {
     key: "handleEncode",
     value: function handleEncode(value) {
-      var _this5 = this;
+      var _this6 = this;
 
       event.preventDefault();
 
@@ -294,7 +327,7 @@ var HammingCodeApp = function (_React$Component4) {
       xhr.addEventListener('load', function () {
         // update the state of the component with the result here
         var bits = JSON.parse(xhr.responseText)["code"];
-
+        console.log(bits);
         //this.setState({bitRowTitle: "Encoded Bits (click to change):", bitRowBits:bits})
         /*let bitButtons = Array.from(bits).map(
           bit => {
@@ -303,7 +336,7 @@ var HammingCodeApp = function (_React$Component4) {
             }
           );*/
 
-        _this5.setState({ encodedText: Helpers.convertBitsToDNA(bits) });
+        _this6.setState({ encodedText: Helpers.convertBitsToDNA(bits), encodedBits: bits });
       });
 
       // send the request
@@ -312,7 +345,7 @@ var HammingCodeApp = function (_React$Component4) {
   }, {
     key: "handleDecode",
     value: function handleDecode(value) {
-      var _this6 = this;
+      var _this7 = this;
 
       event.preventDefault();
       var xhr = new XMLHttpRequest();
@@ -326,7 +359,7 @@ var HammingCodeApp = function (_React$Component4) {
         var message = JSON.parse(xhr.responseText)["message"];
         //console.log(bits)
         //console.log(xhr.responseText)
-        _this6.setState({ decoded: message });
+        _this7.setState({ decoded: message });
       });
 
       // send the request
@@ -338,6 +371,7 @@ var HammingCodeApp = function (_React$Component4) {
       document.querySelector('.hamming-popover') != null && $(document).ready(function () {
         $('.hamming-popover').popover();
       });
+      //$('#quickfit').quickfit();
     }
   }, {
     key: "render",
@@ -346,6 +380,7 @@ var HammingCodeApp = function (_React$Component4) {
         "div",
         { className: "container" },
         React.createElement(EncodeRow, { handleSubmit: this.handleEncode }),
+        React.createElement(BitRow, { bits: this.state.encodedBits }),
         React.createElement(DecodeRow, { handleSubmit: this.handleDecode, superHandleChange: this.handleDecodeChange, heading: "DNA Hamming Code:", encodedText: this.state.encodedText }),
         this.state.encodeRow && React.createElement(
           "button",
@@ -383,28 +418,29 @@ if (document.querySelector(".hamming_app_container")) {
 // Reed-Solomon App Code Start
 
 
-var ReedSolomonCodeApp = function (_React$Component5) {
-  _inherits(ReedSolomonCodeApp, _React$Component5);
+var ReedSolomonCodeApp = function (_React$Component6) {
+  _inherits(ReedSolomonCodeApp, _React$Component6);
 
   function ReedSolomonCodeApp(props) {
     _classCallCheck(this, ReedSolomonCodeApp);
 
-    var _this7 = _possibleConstructorReturn(this, (ReedSolomonCodeApp.__proto__ || Object.getPrototypeOf(ReedSolomonCodeApp)).call(this, props));
+    var _this8 = _possibleConstructorReturn(this, (ReedSolomonCodeApp.__proto__ || Object.getPrototypeOf(ReedSolomonCodeApp)).call(this, props));
 
-    _this7.state = {
+    _this8.state = {
       encodedText: '',
+      encodedBits: '',
       decoded: '',
       noErrors: 3
     };
 
-    _this7.uniqueValue = 0;
-    _this7.handleEncode = _this7.handleEncode.bind(_this7);
-    _this7.handleDecode = _this7.handleDecode.bind(_this7);
-    _this7.handleDecodeChange = _this7.handleDecodeChange.bind(_this7);
-    _this7.handleErrorsChange = _this7.handleErrorsChange.bind(_this7);
+    _this8.uniqueValue = 0;
+    _this8.handleEncode = _this8.handleEncode.bind(_this8);
+    _this8.handleDecode = _this8.handleDecode.bind(_this8);
+    _this8.handleDecodeChange = _this8.handleDecodeChange.bind(_this8);
+    _this8.handleErrorsChange = _this8.handleErrorsChange.bind(_this8);
     //this.handleBitClicked = this.handleBitClicked.bind(this);
     /*this.getEncodedStringFromButtons = this.getEncodedStringFromButtons.bind(this);*/
-    return _this7;
+    return _this8;
   }
 
   /*getEncodedStringFromButtons(){
@@ -451,7 +487,7 @@ var ReedSolomonCodeApp = function (_React$Component5) {
   }, {
     key: "handleEncode",
     value: function handleEncode(value) {
-      var _this8 = this;
+      var _this9 = this;
 
       event.preventDefault();
 
@@ -475,7 +511,7 @@ var ReedSolomonCodeApp = function (_React$Component5) {
             }
           );*/
 
-        _this8.setState({ encodedText: Helpers.convertBitsToDNA(bits) });
+        _this9.setState({ encodedText: Helpers.convertBitsToDNA(bits), encodedBits: bits });
       });
 
       // send the request
@@ -484,7 +520,7 @@ var ReedSolomonCodeApp = function (_React$Component5) {
   }, {
     key: "handleDecode",
     value: function handleDecode(value) {
-      var _this9 = this;
+      var _this10 = this;
 
       event.preventDefault();
       var xhr = new XMLHttpRequest();
@@ -498,7 +534,7 @@ var ReedSolomonCodeApp = function (_React$Component5) {
         var message = JSON.parse(xhr.responseText)["message"];
         //console.log(bits)
         //console.log(xhr.responseText)
-        _this9.setState({ decoded: message });
+        _this10.setState({ decoded: message });
       });
 
       // send the request
@@ -518,6 +554,7 @@ var ReedSolomonCodeApp = function (_React$Component5) {
         "div",
         { className: "container" },
         React.createElement(EncodeRow, { handleSubmit: this.handleEncode }),
+        React.createElement(BitRow, { bits: this.state.encodedBits }),
         React.createElement(DecodeRow, { handleSubmit: this.handleDecode, superHandleChange: this.handleDecodeChange, heading: "DNA Reed-Solomon Code:", encodedText: this.state.encodedText }),
         this.state.encodeRow && React.createElement(
           "button",

@@ -144,11 +144,24 @@ class DecodeRow extends React.Component{
   }
 
 }
+
+class BitRow extends React.Component{
+
+  render(){
+    return(
+      <div id="quickfit" style={{overflow:"hidden", textOverflow:"ellipsis"}}>
+        <p className = "lead">Encoded Bits Fragment:</p>
+        <p className="form-control" style={{backgroundColor:"#272727", color:"white", border:0}}>{this.props.bits}</p>
+      </div>
+      )
+  }
+}
 class HammingCodeApp extends React.Component{
   constructor(props) {
     super(props);
     this.state = {
       encodedText:'',
+      encodedBits:'',
       decoded:''
     }
 
@@ -207,7 +220,7 @@ class HammingCodeApp extends React.Component{
     xhr.addEventListener('load', () => {
       // update the state of the component with the result here
     let bits = JSON.parse(xhr.responseText)["code"];
-
+    console.log(bits)
       //this.setState({bitRowTitle: "Encoded Bits (click to change):", bitRowBits:bits})
     /*let bitButtons = Array.from(bits).map(
       bit => {
@@ -217,7 +230,7 @@ class HammingCodeApp extends React.Component{
       );*/
 
     
-    this.setState({encodedText:Helpers.convertBitsToDNA(bits)})
+    this.setState({encodedText:Helpers.convertBitsToDNA(bits), encodedBits:bits})
     })
 
     // send the request
@@ -247,10 +260,14 @@ class HammingCodeApp extends React.Component{
 
   componentDidUpdate(){
      document.querySelector('.hamming-popover') != null && $(document).ready(function(){ $('.hamming-popover').popover()}); 
+      //$('#quickfit').quickfit();
+
   }
+  
   render(){
    return (<div className="container">
                <EncodeRow handleSubmit={this.handleEncode} />
+                <BitRow bits = {this.state.encodedBits}/>
                 <DecodeRow handleSubmit={this.handleDecode} superHandleChange = {this.handleDecodeChange} heading = "DNA Hamming Code:" encodedText = {this.state.encodedText}/>
                 {this.state.encodeRow && 
                 <button type="button" className="hamming-popover btn btn-outline-light btn-sm" data-toggle="popover" style={{fontSize:"15px"}} title="Click to introduce errors" data-content="Hamming Codes can correct 1 error and detect upto 2 errors. If 3 or more errors occur, Hamming Codes are incorrectly decoded.">?</button>}
@@ -260,8 +277,7 @@ class HammingCodeApp extends React.Component{
                <div className="mt-4">
                   <p className="lead">{this.state.decoded.length != 0 && "Decoded Message:"}</p>
                   <p className="lead" style={{fontWeight:"300"}}>{this.state.decoded}</p>
-               </div>
-                              
+               </div>           
             </div>
           )
   }
@@ -292,6 +308,7 @@ class ReedSolomonCodeApp extends React.Component{
     super(props);
     this.state = {
       encodedText:'',
+      encodedBits:'',
       decoded:'',
       noErrors: 3
     }
@@ -366,7 +383,7 @@ class ReedSolomonCodeApp extends React.Component{
       );*/
 
     
-    this.setState({encodedText:Helpers.convertBitsToDNA(bits)})
+    this.setState({encodedText:Helpers.convertBitsToDNA(bits), encodedBits:bits})
     })
 
     // send the request
@@ -400,7 +417,7 @@ class ReedSolomonCodeApp extends React.Component{
   render(){
    return (<div className="container">
                <EncodeRow handleSubmit={this.handleEncode} />
-              
+                  <BitRow bits = {this.state.encodedBits}/>
                   <DecodeRow handleSubmit={this.handleDecode} superHandleChange = {this.handleDecodeChange} heading = "DNA Reed-Solomon Code:" encodedText = {this.state.encodedText}/>
                   {this.state.encodeRow && 
                   <button type="button" className="hamming-popover btn btn-outline-light btn-sm" data-toggle="popover" style={{fontSize:"15px"}} title="Click to introduce errors" data-content="Hamming Codes can correct 1 error and detect upto 2 errors. If 3 or more errors occur, Hamming Codes are incorrectly decoded.">?</button>}
